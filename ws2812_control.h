@@ -2,7 +2,7 @@
 #define WS2812_CONTROL_H
 #include <stdint.h>
 #include "sdkconfig.h"
-#define NUM_LEDS CONFIG_WS2812_NUM_LEDS
+#define NUM_LEDS  75
 
 // This structure is used for indicating what the colors of each LED should be set to.
 // There is a 32bit value for each LED. Only the lower 3 bytes are used and they hold the
@@ -15,7 +15,7 @@ struct led_state {
 void ws2812_control_init(void);
 
 // Update the LEDs to the new state. Call as needed.
-// This function will block the current task until the RMT peripheral is finished sending 
+// This function will block the current task until the RMT peripheral is finished sending
 // the entire sequence.
 void ws2812_write_leds(struct led_state new_state);
 

@@ -2,17 +2,18 @@
 #include "driver/rmt.h"
 
 // Configure these based on your project needs using menuconfig ********
-#define LED_RMT_TX_CHANNEL			CONFIG_WS2812_LED_RMT_TX_CHANNEL
-#define LED_RMT_TX_GPIO			CONFIG_WS2812_LED_RMT_TX_GPIO
+#define LED_RMT_TX_CHANNEL	0
+#define LED_RMT_TX_GPIO	 18
 // ****************************************************
 
-#define BITS_PER_LED_CMD 24 
+#define BITS_PER_LED_CMD 24
 #define LED_BUFFER_ITEMS ((NUM_LEDS * BITS_PER_LED_CMD))
 
-// These values are determined by measuring pulse timing with logic analyzer and adjusting to match datasheet. 
-#define T0H CONFIG_WS2812_T0H  // 0 bit high time
-#define T1H CONFIG_WS2812_T1H  // 1 bit high time
-#define TL  CONFIG_WS2812_TL  // low time for either bit
+// These values are determined by measuring pulse timing with logic analyzer and adjusting to match datasheet.
+#define T0H   14 // 0 bit high time
+#define T1H   28 // 1 bit high time
+#define T0L   32 // 0 bit low time
+#define T1L   24 // 1 bit high time
 
 
 // This is the buffer which the hw peripheral will access while pulsing the output pin
@@ -43,7 +44,7 @@ void ws2812_write_leds(struct led_state new_state) {
   ESP_ERROR_CHECK(rmt_wait_tx_done(LED_RMT_TX_CHANNEL, portMAX_DELAY));
 }
 
-void setup_rmt_data_buffer(struct led_state new_state) 
+void setup_rmt_data_buffer(struct led_state new_state)
 {
   for (uint32_t led = 0; led < NUM_LEDS; led++) {
     uint32_t bits_to_send = new_state.leds[led];
@@ -51,8 +52,8 @@ void setup_rmt_data_buffer(struct led_state new_state)
     for (uint32_t bit = 0; bit < BITS_PER_LED_CMD; bit++) {
       uint32_t bit_is_set = bits_to_send & mask;
       led_data_buffer[led * BITS_PER_LED_CMD + bit] = bit_is_set ?
-                                                      (rmt_item32_t){{{T1H, 1, TL, 0}}} : 
-                                                      (rmt_item32_t){{{T0H, 1, TL, 0}}};
+                                                      (rmt_item32_t){{{T1H, 1, T1L, 0}}} :
+                                                      (rmt_item32_t){{{T0H, 1, T0L, 0}}};
       mask >>= 1;
     }
   }
